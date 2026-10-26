@@ -1,0 +1,67 @@
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">G</span>
+      <span>GenAI Chat</span>
+    </div>
+    <button class="new-chat" type="button" (click)="startNewChat()">
+      <span aria-hidden="true">+</span>
+      New chat
+    </button>
+  </header>
+
+  <div class="chat-layout">
+    <main class="chat-content">
+      @if (messages().length === 0) {
+        <section class="welcome" aria-label="New conversation">
+          <p class="eyebrow">A NEW CONVERSATION</p>
+          <h1>What are we figuring out today?</h1>
+          <div class="prompt-grid">
+            <button type="button" class="prompt-card" (click)="usePrompt('Break down a complex topic for me')">
+              <span class="prompt-number">01</span>
+              <span>Break down a complex topic</span>
+            </button>
+            <button type="button" class="prompt-card" (click)="usePrompt('Help me find the right words')">
+              <span class="prompt-number">02</span>
+              <span>Help me find the right words</span>
+            </button>
+            <button type="button" class="prompt-card" (click)="usePrompt('Help me plan something from scratch')">
+              <span class="prompt-number">03</span>
+              <span>Plan something from scratch</span>
+            </button>
+          </div>
+        </section>
+      } @else {
+        <section class="conversation" aria-label="Conversation" aria-live="polite">
+          <div class="thread">
+            @for (message of messages(); track $index) {
+              <article class="message-row" [class.is-user]="message.role === 'user'">
+                <span class="avatar" aria-hidden="true">Y</span>
+                <p class="message-text">{{ message.text }}</p>
+              </article>
+            }
+          </div>
+        </section>
+      }
+    </main>
+
+    <footer class="composer-area">
+      <form class="composer" (ngSubmit)="sendMessage()">
+        <textarea
+          name="message"
+          [ngModel]="draft()"
+          (ngModelChange)="draft.set($event)"
+          (keydown)="handleEnter($event)"
+          placeholder="Message GenAI Chat"
+          aria-label="Write a message"
+          rows="2"
+          maxlength="4000"
+        ></textarea>
+        <div class="composer-footer">
+          <span class="key-hint">Enter to send <span aria-hidden="true">·</span> Shift + Enter for a new line</span>
+          <button class="send-button" type="submit" [disabled]="!draft().trim()">Send</button>
+        </div>
+      </form>
+    </footer>
+  </div>
+</div>
