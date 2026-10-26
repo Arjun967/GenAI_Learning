@@ -4,7 +4,7 @@
       <span class="brand-mark" aria-hidden="true">G</span>
       <span>GenAI Chat</span>
     </div>
-    <button class="new-chat" type="button" (click)="startNewChat()">
+    <button class="new-chat" type="button" (click)="startNewChat()" [disabled]="isSending()">
       <span aria-hidden="true">+</span>
       New chat
     </button>
@@ -36,9 +36,15 @@
           <div class="thread">
             @for (message of messages(); track $index) {
               <article class="message-row" [class.is-user]="message.role === 'user'">
-                <span class="avatar" aria-hidden="true">Y</span>
+                <span class="avatar" aria-hidden="true">{{ message.role === 'user' ? 'Y' : 'G' }}</span>
                 <p class="message-text">{{ message.text }}</p>
               </article>
+            }
+            @if (isSending()) {
+              <div class="assistant-state" aria-live="polite">
+                <span class="avatar" aria-hidden="true">G</span>
+                <span>Thinking...</span>
+              </div>
             }
           </div>
         </section>
@@ -47,6 +53,9 @@
 
     <footer class="composer-area">
       <form class="composer" (ngSubmit)="sendMessage()">
+        @if (serviceError()) {
+          <p class="service-error" role="alert">{{ serviceError() }}</p>
+        }
         <textarea
           name="message"
           [ngModel]="draft()"
@@ -59,7 +68,9 @@
         ></textarea>
         <div class="composer-footer">
           <span class="key-hint">Enter to send <span aria-hidden="true">·</span> Shift + Enter for a new line</span>
-          <button class="send-button" type="submit" [disabled]="!draft().trim()">Send</button>
+          <button class="send-button" type="submit" [disabled]="!draft().trim() || isSending()">
+            {{ isSending() ? 'Sending...' : 'Send' }}
+          </button>
         </div>
       </form>
     </footer>

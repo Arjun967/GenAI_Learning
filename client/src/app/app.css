@@ -177,6 +177,15 @@
 	animation: arrive 220ms ease both;
 }
 
+.assistant-state {
+	min-height: 30px;
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	color: var(--muted);
+	font-size: 13px;
+}
+
 .avatar {
 	width: 30px;
 	height: 30px;
@@ -267,6 +276,13 @@
 	justify-content: space-between;
 	gap: 12px;
 	padding: 0 3px 0 11px;
+}
+
+.service-error {
+	margin: 8px 12px 0;
+	color: #a23c2d;
+	font-size: 13px;
+	line-height: 1.4;
 }
 
 .key-hint {

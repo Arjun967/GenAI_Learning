@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 type ChatMessage = {
-  role: 'user';
+  role: 'user' | 'assistant';
   text: string;
 };
 
@@ -15,16 +15,51 @@ type ChatMessage = {
 export class App {
   protected readonly draft = signal('');
   protected readonly messages = signal<ChatMessage[]>([]);
+  protected readonly isSending = signal(false);
+  protected readonly serviceError = signal('');
 
-  protected sendMessage(): void {
+  protected async sendMessage(): Promise<void> {
     const text = this.draft().trim();
 
-    if (!text) {
+    if (!text || this.isSending()) {
       return;
     }
 
-    this.messages.update((messages) => [...messages, { role: 'user', text }]);
+    const conversation = [...this.messages(), { role: 'user' as const, text }];
+    this.messages.set(conversation);
     this.draft.set('');
+    this.serviceError.set('');
+    this.isSending.set(true);
+
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: conversation.slice(-20).map(({ role, text: content }) => ({ role, content })),
+        }),
+      });
+      const result = await response.json() as { reply?: string; detail?: string };
+
+      if (!response.ok) {
+        throw new Error(result.detail ?? 'The AI service could not complete this request.');
+      }
+
+      this.messages.update((messages) => [
+        ...messages,
+        { role: 'assistant', text: result.reply ?? '' },
+      ]);
+    } catch (error) {
+      this.serviceError.set(
+        error instanceof TypeError
+          ? 'Could not reach the API. Make sure the FastAPI server is running.'
+          : error instanceof Error
+            ? error.message
+            : 'The AI service could not complete this request.',
+      );
+    } finally {
+      this.isSending.set(false);
+    }
   }
 
   protected handleEnter(event: KeyboardEvent): void {
@@ -41,7 +76,12 @@ export class App {
   }
 
   protected startNewChat(): void {
+    if (this.isSending()) {
+      return;
+    }
+
     this.messages.set([]);
     this.draft.set('');
+    this.serviceError.set('');
   }
 }
