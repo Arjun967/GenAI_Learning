@@ -1,0 +1,179 @@
+<div class="page-shell">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Product Lens home">
+      <span class="brand-icon" aria-hidden="true">P</span>
+      <span>product<span class="brand-light">lens</span></span>
+    </a>
+    <span class="topbar-note"><span class="status-dot"></span> AI PRODUCT STUDIO</span>
+  </header>
+
+  <main class="workspace">
+    <section class="intro">
+      <p class="eyebrow">LISTING INTELLIGENCE <span> / </span> DESCRIPTION ANALYZER</p>
+      <h1>Make every word<br><em>work harder.</em></h1>
+      <p class="intro-copy">
+        Get a clear read on your product copy, then turn the good into great.
+      </p>
+    </section>
+
+    <div class="analyzer-grid">
+      <section class="input-panel" aria-labelledby="input-heading">
+        <div class="panel-heading">
+          <div>
+            <span class="step-label">01 / YOUR PRODUCT</span>
+            <h2 id="input-heading">Tell us what you're selling</h2>
+          </div>
+          <span class="sparkle" aria-hidden="true">✳</span>
+        </div>
+
+        <form (ngSubmit)="analyze()">
+          <label for="product-name">Product name <span class="required">*</span></label>
+          <input
+            id="product-name"
+            name="productName"
+            type="text"
+            placeholder="e.g. Everyday Carry Tote"
+            [ngModel]="productName()"
+            (ngModelChange)="productName.set($event)"
+            maxlength="120"
+            required
+          >
+
+          <div class="field-row">
+            <div class="field">
+              <label for="category">Category</label>
+              <input
+                id="category"
+                name="category"
+                type="text"
+                placeholder="e.g. Accessories"
+                [ngModel]="category()"
+                (ngModelChange)="category.set($event)"
+                maxlength="80"
+              >
+            </div>
+            <div class="field">
+              <label for="audience">Target audience</label>
+              <input
+                id="audience"
+                name="audience"
+                type="text"
+                placeholder="e.g. Daily commuters"
+                [ngModel]="audience()"
+                (ngModelChange)="audience.set($event)"
+                maxlength="120"
+              >
+            </div>
+          </div>
+
+          <label for="description">Current description <span class="required">*</span></label>
+          <textarea
+            id="description"
+            name="description"
+            placeholder="Paste your product description here. Include the features, materials, and details shoppers should know..."
+            [ngModel]="description()"
+            (ngModelChange)="description.set($event)"
+            maxlength="4000"
+            rows="7"
+            required
+          ></textarea>
+          <div class="textarea-meta">
+            <span>Be specific — the details make the difference.</span>
+            <span>{{ descriptionLength }} / 4,000</span>
+          </div>
+
+          <label for="tone">Preferred writing tone</label>
+          <select
+            id="tone"
+            name="tone"
+            [ngModel]="tone()"
+            (ngModelChange)="tone.set($event)"
+          >
+            <option>Persuasive</option>
+            <option>Friendly</option>
+            <option>Professional</option>
+            <option>Minimal</option>
+            <option>Playful</option>
+          </select>
+
+          @if (errorMessage()) {
+            <p class="error-message" role="alert">{{ errorMessage() }}</p>
+          }
+
+          <button class="analyze-button" type="submit" [disabled]="isAnalyzing() || !productName().trim() || !description().trim()">
+            <span>{{ isAnalyzing() ? 'Analyzing your copy...' : 'Analyze my description' }}</span>
+            <span aria-hidden="true">{{ isAnalyzing() ? '◌' : '↗' }}</span>
+          </button>
+          <p class="privacy-note"><span aria-hidden="true">↗</span> Your product details are only used for this analysis.</p>
+        </form>
+      </section>
+
+      <section class="results-panel" aria-labelledby="results-heading" aria-live="polite">
+        <div class="panel-heading results-heading">
+          <div>
+            <span class="step-label">02 / YOUR INSIGHTS</span>
+            <h2 id="results-heading">The listing report</h2>
+          </div>
+          <span class="report-mark" aria-hidden="true">✳</span>
+        </div>
+
+        @if (isAnalyzing()) {
+          <div class="empty-state loading-state">
+            <span class="loading-mark" aria-hidden="true">✳</span>
+            <h3>Reading between the lines</h3>
+            <p>We're looking at clarity, benefits, and what could make your copy stronger.</p>
+          </div>
+        } @else if (result(); as report) {
+          <div class="report">
+            <div class="score-card">
+              <div class="score-number">{{ report.score }}<span>/100</span></div>
+              <div class="score-copy">
+                <span class="score-label">DESCRIPTION SCORE</span>
+                <p>{{ report.summary }}</p>
+              </div>
+            </div>
+
+            <div class="insight-block">
+              <h3><span class="insight-icon good" aria-hidden="true">+</span> What's working</h3>
+              <ul>
+                @for (strength of report.strengths; track strength) {
+                  <li>{{ strength }}</li>
+                }
+              </ul>
+            </div>
+
+            <div class="insight-block">
+              <h3><span class="insight-icon improve" aria-hidden="true">↗</span> Room to improve</h3>
+              <ul>
+                @for (improvement of report.improvements; track improvement) {
+                  <li>{{ improvement }}</li>
+                }
+              </ul>
+            </div>
+
+            <div class="rewrite-card">
+              <span class="step-label">A STRONGER VERSION</span>
+              <p>{{ report.optimized_description }}</p>
+            </div>
+          </div>
+        } @else {
+          <div class="empty-state">
+            <div class="empty-illustration" aria-hidden="true">
+              <span class="orbit orbit-one"></span>
+              <span class="orbit orbit-two"></span>
+              <span class="empty-star">✳</span>
+            </div>
+            <h3>Your next great listing<br>starts here.</h3>
+            <p>Fill in the product details and run an analysis to see your insights.</p>
+          </div>
+        }
+
+        <div class="results-footer">
+          <span class="footer-line"></span>
+          <span>MADE FOR BETTER PRODUCT STORIES</span>
+          <span class="footer-line"></span>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
